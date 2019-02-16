@@ -21,11 +21,10 @@
 """ Logger module for writhing messages to standard output
 """
 
-__version__ = "0.2.0"
-__author__ = "Nikola Radakovic"
-__email__ = "radaknikolans@gmail.com"
-__credits__ = "Nikola Radakovic"
-__status__ = "Development"
+__version__ = '0.2.0'
+__author__ = 'Nikola Radakovic'
+__email__ = 'radaknikolans@gmail.com'
+__status__ = 'Development'
 
 # --------------------------------------------------------------
 # Imports
@@ -49,8 +48,7 @@ def construct_header(data):
         call_function = 'main'
     else:
         call_function = data[2][3]
-    line = str(data[2][2])
-    return f'[{call_function}::{line}]'
+    return f'[{call_function}::{data[2][2]}]'
 
 
 # ---------------------------------------------------------
@@ -93,6 +91,8 @@ class Log:
     DEBUG_3 = int(32)
     ENTER_EXIT_POINT = int(64)
     ALL = int(127)
+
+    MAX_OFFSET = 125
 
     LEVEL_COLOR = {
         ERROR: [RED, 'ERROR'],
@@ -171,6 +171,9 @@ class Log:
         if not self._use_header:
             raise AssignmentError('Header is not in use, so offset cannot be '
                                   'set!')
+        if offset > self.MAX_OFFSET:
+            raise ValueError(f'Offset {offset} is over limit. '
+                             f'Max offset is 125!')
         self._offset = offset
 
     def append_log_level(self, level):
