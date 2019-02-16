@@ -21,21 +21,60 @@
 """ Logger module for writhing messages to standard output
 """
 
+__version__ = "0.2.0"
+__author__ = "Nikola Radakovic"
+__email__ = "radaknikolans@gmail.com"
+__credits__ = "Nikola Radakovic"
+__status__ = "Development"
+
 # --------------------------------------------------------------
 # Imports
 # --------------------------------------------------------------
-import sys
 import inspect
+
+# ---------------------------------------------------------
+# constants
+# ---------------------------------------------------------
+
+
+# ---------------------------------------------------------
+# Useful functions
+# ---------------------------------------------------------
+def construct_header(data):
+    """ Construct a header as prefix to log message by inspecting stack
+    :param data: call sequence stack
+    :return: Constructed header based on stack inspection
+    """
+    if data[2][3] == '<module>':
+        call_function = 'main'
+    else:
+        call_function = data[2][3]
+    line = str(data[2][2])
+    return f'[{call_function}::{line}]'
+
+
+# ---------------------------------------------------------
+# logger based exceptions
+# ---------------------------------------------------------
+class LoggerError(BaseException):
+    """
+    Base logger exception
+    """
+
+
+class AssignmentError(LoggerError):
+    """
+    Forbidden assignment exception
+    """
+
+
 # --------------------------------------------------------------
 # Global variables & classes
 # --------------------------------------------------------------
-
-
-class Colors:
+class Log:
     """
-    Log class for color output
+    Main logger class for printing messages to standard output.
     """
-
     RED = '\033[31m'
     BLUE = '\033[94m'
     GREEN = '\033[92m'
@@ -46,14 +85,6 @@ class Colors:
     PURPLE = '\033[95m'
     RESET = '\033[39m'
 
-    OFF = int(0)
-    ON = int(1)
-
-
-class Log:
-    """
-    Log class for output
-    """
     ERROR = int(1)
     WARNING = int(2)
     INFO = int(4)
@@ -63,299 +94,121 @@ class Log:
     ENTER_EXIT_POINT = int(64)
     ALL = int(127)
 
-    def __init__(self, log_level=0, enable_color=Colors.OFF, default_offset=50):
-        """ Constructor for logger module
-        :param log_level: Log level of the instance
-        :param enable_color: If 1 use colorized output, otherwise no
-        :param default_offset: Used to determent the offset base
-        """
-        self.__log_level = log_level
-        self.__enable_color = enable_color
-        self.__header = ""
-        self.__default_offset = default_offset
-        self.__enable_header = False
+    LEVEL_COLOR = {
+        ERROR: [RED, 'ERROR'],
+        WARNING: [YELLOW, 'WARNING'],
+        INFO: [GREEN, 'INFO'],
+        DEBUG: [BLUE, 'DEBUG'],
+        DEBUG_2: [CYAN, 'DEBUG_2'],
+        DEBUG_3: [PURPLE, 'DEBUG_3']
+    }
 
-    def __get_color(self, color):
-        """ Check if the color output is enabled or not
-        :param color: requested color
-        :return: if colorized output is enabled, requested @param::color will be
-                 returned, otherwise default color console output is used.
+    def __init__(self, level=0, use_colors=False, offset=0):
         """
-        if self.__enable_color:
-            return color
-        return Colors.RESET
-
-    def __construct_header(self, data):
-        """ Construct a header as prefix to log message by inspecting stack
-        :param data: call sequence stack
-        :return: Constructed header based on stack inspection
-        """
-        if data[1][3] == '<module>':
-            call_function = 'main'
-        else:
-            call_function = data[1][3]
-        line = str(data[1][2])
-        self.__header = f'[{call_function}::{line}]'
-
-    def __print_log_with_header(self, offset, print_color, label, msg):
-        """ Print function with header as prefix
+        Logger constructor
+        :param level:
+        :param use_colors:
         :param offset:
-        :param print_color:
-        :param label:
-        :param msg:
+        """
+
+        self.level = level
+        self.use_colors = use_colors
+        self._offset = offset
+        self._use_header = False
+
+    def _print_log(self, lvl_info, message=''):
+        length = len(lvl_info[1])
+        if self.use_header:
+            header = construct_header(inspect.stack())
+            offset = self._offset - len(header) - 4 - length
+            padding = 1
+        else:
+            header = ''
+            padding = 8 - length
+            offset = 0
+        print('{}{}{}{}{}:{}{}'.format(header,
+                                       "".ljust(offset),
+                                       lvl_info[0],
+                                       lvl_info[1],
+                                       self.RESET,
+                                       "".ljust(padding),
+                                       message))
+
+    @property
+    def use_header(self):
+        """
+        Getter for header usage
+        :return: True or False
+        """
+        return self._use_header
+
+    @property
+    def offset(self):
+        """
+        Getter for offset
+        :return: integer number
+        """
+        return self._offset
+
+    @use_header.setter
+    def use_header(self, use_header):
+        """
+        Setter for header usage
+        :param use_header: True of False
         :return:
         """
-        print('{}{}{}{}{}: {}'.format(self.__header,
-                                      "".ljust(offset),
-                                      self.__get_color(print_color),
-                                      label,
-                                      Colors.RESET,
-                                      msg))
+        if not use_header:
+            self._offset = 0
+        self._use_header = use_header
 
-    def __print_log(self, print_color, label, label_offset, msg):
-        """ [PRIVATE]: Print function without header as prefix
-        :param print_color:
-        :param label:
-        :param label_offset:
-        :param msg:
+    @offset.setter
+    def offset(self, offset):
+        """
+        Setter for offset
+        :param offset: integer offset
         :return:
         """
-        print('{}{}{}{}{}{}'.format(self.__get_color(print_color),
-                                    label,
-                                    Colors.RESET,
-                                    label_offset,
-                                    "".ljust(5),
-                                    msg))
-
-    def set_log_level(self, level, color):
-        """ Set the log level
-        :param level: Level to be set
-        :param color: Color to be set
-        """
-        self.__log_level = level
-        self.__enable_color = color
+        if not self._use_header:
+            raise AssignmentError('Header is not in use, so offset cannot be '
+                                  'set!')
+        self._offset = offset
 
     def append_log_level(self, level):
         """ Append the new log level to the current one
         :param level: Log level to be append
         """
-        self.__log_level |= level
+        self.level |= level
 
     def remove_log_level(self, level):
         """ Remove log level from current setup
         :param level: Log level to be removed
         """
-        self.__log_level &= (~level)
+        self.level &= (~level)
 
-    def get_log_level(self):
-        """ Return current log level
-        :return: Current log level
-        """
-        return self.__log_level
-
-    def enable_log_color(self, enable):
-        """ Turn OFF/ON the color output
-        :param enable: If 1 enable color output, else default color output
-        """
-        self.__enable_color = enable
-
-    def enable_header(self, enable):
-        """ Turn ON/OFF header prefix
-        :param enable: If True header prefix will be added to the log
-        """
-        self.__enable_header = enable
-
-    def i(self, message):
+    def info(self, message=''):
         """ Info log
         :param message: Text to be printed on this level
         """
-        if (self.__log_level & self.INFO) > 0:
-            if self.__enable_header:
-                self.__construct_header(inspect.stack())
-                offset = self.__default_offset - len(self.__header)\
-                    - 4 - len("INFO")
-                self.__print_log_with_header(offset,
-                                             Colors.GREEN,
-                                             "INFO",
-                                             message)
-            else:
-                self.__print_log(Colors.GREEN, "INFO", ":    ", message)
+        if (self.level & self.INFO) > 0:
+            self._print_log(self.LEVEL_COLOR[self.INFO], message)
 
-    def w(self, message):
+    def warning(self, message=''):
         """ Warning log
         :param message: Text to be printed on this level
         """
-        if (self.__log_level & self.WARNING) > 0:
-            if self.__enable_header:
-                self.__construct_header(inspect.stack())
-                offset = self.__default_offset - len(self.__header) - 4 - len("WARNING")
-                self.__print_log_with_header(offset, Colors.YELLOW, "WARNING", message)
-            else:
-                self.__print_log(Colors.YELLOW, "WARNING", ": ", message)
+        if (self.level & self.WARNING) > 0:
+            self._print_log(self.LEVEL_COLOR[self.WARNING], message)
 
-    def e(self, message):
+    def error(self, message=''):
         """ Error log
         :param message: Text to be printed on this level
         """
-        if(self.__log_level & self.ERROR) > 0:
-            if self.__enable_header:
-                self.__construct_header(inspect.stack())
-                offset = self.__default_offset - len(self.__header) - 4 - len("ERROR")
-                self.__print_log_with_header(offset, Colors.RED, "ERROR", message)
-            else:
-                self.__print_log(Colors.RED, "ERROR", ":   ", message)
+        if (self.level & self.ERROR) > 0:
+            self._print_log(self.LEVEL_COLOR[self.ERROR], message)
 
-    def d(self, message):
-        """ Debug log - level 1
+    def debug(self, message=''):
+        """ Debug log
         :param message: Text to be printed on this level
         """
-        if(self.__log_level & self.DEBUG) > 0:
-            if self.__enable_header:
-                self.__construct_header(inspect.stack())
-                offset = self.__default_offset - len(self.__header) - 4 - len("DEBUG")
-                self.__print_log_with_header(offset, Colors.BLUE, "DEBUG", message)
-            else:
-                self.__print_log(Colors.BLUE, "DEBUG", ":   ", message)
-
-    def d2(self, message):
-        """ Debug log - level 2
-        :param message: Text to be printed on this level
-        """
-        if(self.__log_level & self.DEBUG_2) > 0:
-            if self.__enable_header:
-                self.__construct_header(inspect.stack())
-                offset = self.__default_offset - len(self.__header) - 4 - len("DEBUG_2")
-                self.__print_log_with_header(offset, Colors.CYAN, "DEBUG_2", message)
-            else:
-                self.__print_log(Colors.CYAN, "DEBUG_2", ": ", message)
-
-    def d3(self, message):
-        """ Debug log - level 3
-        :param message: Text to be printed on this level
-        """
-        if(self.__log_level & self.DEBUG_3) > 0:
-            if self.__enable_header:
-                self.__construct_header(inspect.stack())
-                offset = self.__default_offset - len(self.__header) - 4 - len("DEBUG_3")
-                self.__print_log_with_header(offset, Colors.PURPLE, "DEBUG_3", message)
-            else:
-                self.__print_log(Colors.PURPLE, "DEBUG_3", ": ", message)
-
-    def enter(self, name=""):
-        """ Debug log - for logging function name on entry point
-        :param name: Class name
-        """
-        if(self.__log_level & self.ENTER_EXIT_POINT) > 0:
-            self.__construct_header(inspect.stack())
-            message = ""
-            if self.__enable_header:
-                offset = self.__default_offset - len(self.__header) - 4 - len("_ENTER_")
-                if name != "":
-                    message = "<" + Colors.PURPLE + "class" + Colors.RESET \
-                                 + ": " + Colors.BLUE + name + Colors.RESET + ">"
-                    self.__print_log_with_header(offset, Colors.PURPLE, "_ENTER_", message)
-            else:
-                class_name = ""
-                if name != "":
-                    class_name = " [" + Colors.BLUE + name + Colors.RESET + "]"
-                message = ">>> " + self.__get_color(Colors.YELLOW) + self.__header + Colors.RESET + class_name
-                self.__print_log(Colors.PURPLE, "ENTER", ":   ", message)
-
-    def exit(self, name=""):
-        """ Debug log - for logging function name on exit point
-        :param name: Class name
-        """
-        if(self.__log_level & self.ENTER_EXIT_POINT) > 0:
-            self.__construct_header(inspect.stack())
-            message = ""
-            if self.__enable_header:
-                offset = self.__default_offset - len(self.__header) - 4 - len("_EXIT_")
-                if name != "":
-                    message = "<" + Colors.PURPLE + "class" + Colors.RESET \
-                                 + ": " + Colors.BLUE + name + Colors.RESET + ">"
-                    self.__print_log_with_header(offset, Colors.PURPLE, "_EXIT_", message)
-            else:
-                class_name = ""
-                if name != "":
-                    class_name = " [" + Colors.BLUE + name + Colors.RESET + "]"
-                message = "<<< " + self.__get_color(Colors.YELLOW) + self.__header + Colors.RESET + class_name
-                self.__print_log(Colors.PURPLE, "EXIT", ":    ", message)
-
-    def no_header(self, log_level, message):
-        """ Log without header which will be written based on current log level of instance
-        :param log_level: statically set log level
-        :param message: Text to be printed on this level
-        """
-        if (self.__log_level & log_level) > 0:
-            print(message)
-
-
-# ====================================================
-# Main loop - This is only for testing this script
-# ====================================================
-if __name__ == '__main__':
-
-    sys.dont_write_bytecode = True
-
-    log = Log(Log.INFO | Log.ERROR, Colors.ON)
-
-    # ---------- TEST 1 -----------
-    # Enabling only INFO and ERROR logs
-    log.set_log_level(Log.INFO | Log.ERROR, Colors.ON)
-    test = "1"
-
-    log.i("This" +
-          " is a test " + test)
-    log.w("This is a test " + test)
-    log.e("This is a test " + test)
-    log.d("This is a test " + test)
-    log.d2("This is a test " + test)
-    log.d3("This is a test " + test)
-    log.enter()
-    log.exit()
-
-    # ---------- TEST 2 --------
-    # Enabling ALL logs
-    log.append_log_level(Log.ALL)
-    test = "2"
-
-    log.i("This" +
-          " is a test " + test)
-    log.w("This is a test " + test)
-    log.e("This is a test " + test)
-    log.d("This is a test " + test)
-    log.d2("This is a test " + test)
-    log.d3("This is a test " + test)
-    log.enter("TestClass")
-    log.exit("TestClass")
-
-    # ---------- TEST 3 --------
-    # Disabling DEBUG_3 and ENTER_EXIT logs
-    log.remove_log_level(Log.DEBUG_3 | Log.ENTER_EXIT_POINT)
-    test = "3"
-
-    log.i("This" +
-          " is a test " + test)
-    log.w("This is a test " + test)
-    log.e("This is a test " + test)
-    log.d("This is a test " + test)
-    log.d2("This is a test " + test)
-    log.d3("This is a test " + test)
-    log.enter("TestClass")
-    log.exit("TestClass")
-
-    # ---------- TEST 4 --------
-    # Disabling DEBUG_4 and ENTER_EXIT logs
-    log.set_log_level(Log.ALL, Colors.ON)
-    log.enable_header(True)
-    test = "4"
-
-    log.i("This" +
-          " is a test " + test)
-    log.w("This is a test " + test)
-    log.e("This is a test " + test)
-    log.d("This is a test " + test)
-    log.d2("This is a test " + test)
-    log.d3("This is a test " + test)
-    log.enter("TestClass")
-    log.exit("TestClass")
+        if (self.level & self.DEBUG) > 0:
+            self._print_log(self.LEVEL_COLOR[self.DEBUG], message)
