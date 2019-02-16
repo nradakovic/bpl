@@ -1,14 +1,25 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+# --------------------------------------------------------------
+# logger.py
+# --------------------------------------------------------------
+# Copyright (C) 2019 Nikola Radakovic
+# email: radaknikolans@gmail.com
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
 
-# ==============================================================
-# Description: This script represent main logger module for all
-#              python scripts. It should be in use so that the
-#              logging inside scripts is clear and easy to track
-#
-# Author:      Nikola Radakovic
-# Version:     v.2.0.0
-#
-# ==============================================================
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+""" Logger module for writhing messages to standard output
+"""
 
 # --------------------------------------------------------------
 # Imports
@@ -21,7 +32,8 @@ import inspect
 
 
 class Colors:
-    """ Log class for color output
+    """
+    Log class for color output
     """
 
     RED = '\033[31m'
@@ -39,7 +51,8 @@ class Colors:
 
 
 class Log:
-    """ Log class for output
+    """
+    Log class for output
     """
     ERROR = int(1)
     WARNING = int(2)
@@ -77,12 +90,12 @@ class Log:
         :param data: call sequence stack
         :return: Constructed header based on stack inspection
         """
-        if data[1][3] == "<module>":
-            call_function = "main"
+        if data[1][3] == '<module>':
+            call_function = 'main'
         else:
             call_function = data[1][3]
         line = str(data[1][2])
-        self.__header = '[{}::{}]'.format(call_function, line)
+        self.__header = f'[{call_function}::{line}]'
 
     def __print_log_with_header(self, offset, print_color, label, msg):
         """ Print function with header as prefix
