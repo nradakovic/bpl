@@ -1,0 +1,26 @@
+name: static_code_validation_src
+
+on:
+  pull_request:
+    paths:
+      - 'srcs/**'
+      - '.github/workflows/linter_check_sources.yml'
+    types: [opened,synchronize]
+
+jobs:
+  static_check:
+    name: Run static code checker on sources
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+      - name: Run pylint on src
+        run: |
+          pylint srcs
