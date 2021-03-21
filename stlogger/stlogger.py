@@ -46,7 +46,7 @@ __status__     = "Development"
 # ---------------------------------------------------------------------
 # Global level variables wrapped from logging module
 # ---------------------------------------------------------------------
-NOLOG = log.NOTSET
+NOTSET = log.NOTSET
 DEBUG = log.DEBUG
 INFO = log.INFO
 WARNING = log.WARNING
