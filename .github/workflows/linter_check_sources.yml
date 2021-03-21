@@ -3,7 +3,7 @@ name: static_code_validation_src
 on:
   pull_request:
     paths:
-      - 'srcs/**'
+      - 'stlogger/**'
       - '.github/workflows/linter_check_sources.yml'
     types: [opened,synchronize]
 
