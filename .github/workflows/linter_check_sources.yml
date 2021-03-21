@@ -3,7 +3,7 @@ name: static_code_validation_src
 on:
   pull_request:
     paths:
-      - 'srcs/**'
+      - 'stlogger/**'
       - '.github/workflows/linter_check_sources.yml'
     types: [opened,synchronize]
 
@@ -21,6 +21,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint
-      - name: Run pylint on src
+      - name: Run pylint on stlogger
         run: |
-          pylint srcs
+          pylint stlogger

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 # --------------------------------------------------------------
-# logger.py
-# --------------------------------------------------------------
 # Copyright (C) 2021 Nikola Radakovic
 # email: radaknikolans@gmail.com
 #
@@ -23,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""" Logger module for writhing messages to standard output
+""" STLogger module is used to write formatted messages to standard output.
 """
 
 # ---------------------------------------------------------------------
@@ -37,16 +35,27 @@ import logging as log
 # Authorship information
 # ---------------------------------------------------------------------
 __author__     = "Nikola Radakovic"
-__copyright__  = "Copyright 2021, The Logger V2 Project"
-__license__    = "GPL"
-__version__    = "2.0.0"
+__copyright__  = "Copyright 2021, The Logger Project"
+__license__    = "MIT"
+__version__    = "0.0.1"
 __maintainer__ = "Nikola Radakovic"
 __email__      = "radaknikolans@gmail.com"
 __status__     = "Development"
 
 
 # ---------------------------------------------------------------------
-# Public class
+# Global level variables wrapped from logging module
+# ---------------------------------------------------------------------
+NOTSET = log.NOTSET
+DEBUG = log.DEBUG
+INFO = log.INFO
+WARNING = log.WARNING
+ERROR = log.ERROR
+CRITICAL = log.CRITICAL
+
+
+# ---------------------------------------------------------------------
+# Logger class
 # ---------------------------------------------------------------------
 class STLogger(log.Logger):
     """
@@ -65,15 +74,15 @@ class STLogger(log.Logger):
 
     def __init__(self, default_name=_DEFAULT_NAME):
         """
-        Constructor of the logger which will set default name in main
-        logging class
-        :param default_name: string name which will be used for all
+        Constructor of the logger which will set default name for
+        all modules.
+        :param default_name: string name that will be used for all
                              logs which don't set name explicitly.
         """
         super().__init__(name=default_name)
 
     @staticmethod
-    def create_logger(module=None, level=log.INFO, c_format=None):
+    def create_logger(module=None, level=INFO, c_format=None):
         """
         Static class which creates custom logger.
         :param module: string name of the module
@@ -92,7 +101,7 @@ class STLogger(log.Logger):
             stream = log.StreamHandler()
             formatter = log.Formatter(c_format if c_format is not None
                                       else STLogger._FORMAT)
-            stream.setFormatter(log.Formatter(formatter))
+            stream.setFormatter(formatter)
             logger.addHandler(stream)
             logger.setLevel(level)
 
@@ -103,7 +112,7 @@ class STLogger(log.Logger):
 
 
 # ---------------------------------------------------------------------
-# Public functions
+# Version and authorship info functions
 # ---------------------------------------------------------------------
 def authorship():
     """
