@@ -28,19 +28,20 @@
 # Imports
 # ---------------------------------------------------------------------
 import sys
+import json
 import argparse
 import logging as log
 
 # ---------------------------------------------------------------------
 # Authorship information
 # ---------------------------------------------------------------------
-__author__     = "Nikola Radakovic"
-__copyright__  = "Copyright 2021, The Logger Project"
-__license__    = "MIT"
-__version__    = "0.0.1"
-__maintainer__ = "Nikola Radakovic"
-__email__      = "radaknikolans@gmail.com"
-__status__     = "Development"
+__author__     = 'Nikola Radakovic'
+__copyright__  = 'Copyright 2021, The Logger Project'
+__license__    = 'MIT'
+__version__    = '0.0.1'
+__maintainer__ = 'Nikola Radakovic'
+__email__      = 'radaknikolans@gmail.com'
+__status__     = 'Development'
 
 
 # ---------------------------------------------------------------------
@@ -63,37 +64,46 @@ class STLogger(log.Logger):
     different modules, files, and functions with colored output or
     without it (several formats supported).
     """
-    _MODULES = ({})
-    _DEFAULT_NAME = "STLogger"
+    _MODULES = []
+    _DEFAULT_NAME = 'STLogger'
     _FORMAT = (
-        "%(asctime)s - "
-        "%(name)s - "
-        "%(levelname)s: "
-        "%(message)s"
+        '%(asctime)s - '
+        '%(name)s - '
+        '%(levelname)s: '
+        '%(message)s'
     )
+    _CONFIG = None
 
-    def __init__(self, default_name=_DEFAULT_NAME):
+    def __init__(self, default_name=_DEFAULT_NAME, config=None):
         """
         Constructor of the logger which will set default name for
         all modules.
         :param default_name: string name that will be used for all
                              logs which don't set name explicitly.
+        :param config: string path to the json configuration.
         """
         super().__init__(name=default_name)
+        if config is not None:
+            with open(config) as handle:
+                for raw in json.load(handle)['modules']:
+                    STLogger.create_logger(raw['module'],
+                                           log.getLevelName(raw['level']))
 
     @staticmethod
     def create_logger(module=None, level=INFO, c_format=None):
         """
         Static class which creates custom logger.
         :param module: string name of the module
-        :param level: int level of supported messages
+        :param level: int level of supported messages (it will override
+                      current level saved on module)
         :param c_format: tuple object representing format for messages
         :return: Logger objects which can be used to print messages
         """
-
         name = STLogger._DEFAULT_NAME
         if module is not None:
-            STLogger._MODULES.update({"module": module, "level": level})
+            if module not in STLogger._MODULES:
+                STLogger._MODULES.append({'module': module,
+                                          'level': level})
             name = module
 
         logger = log.getLogger(name)
@@ -110,6 +120,21 @@ class STLogger(log.Logger):
 
         return logger
 
+    @staticmethod
+    def get_logger(module):
+        """
+        Wrapper method around logging.getLogger() to make sure the formatting
+        for requested logger has been set using json config file.
+        :param module: string name of the module
+        :return: Logger objects which can be used to print messages
+        """
+        if len(STLogger._MODULES) == 0:
+            raise ValueError('There are no modules set!')
+
+        if not any(m['module'] == module for m in STLogger._MODULES):
+            raise ValueError(f'Module {module} is not set')
+
+        return log.getLogger(module)
 
 # ---------------------------------------------------------------------
 # Version and authorship info functions
@@ -134,11 +159,11 @@ def parse_argv(argv):
     :return: parsing object
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--authorship_information",
-                        dest="auth_info", action="store_false",
+    parser.add_argument('-a', '--authorship_information',
+                        dest='auth_info', action='store_false',
                         default=True)
-    parser.add_argument("-v", "--version", dest="version",
-                        action="store_true", default=False)
+    parser.add_argument('-v', '--version', dest='version',
+                        action='store_true', default=False)
     return parser.parse_args(argv)
 
 
@@ -157,5 +182,5 @@ def main(argv=None):
 
     return 0
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

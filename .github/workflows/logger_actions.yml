@@ -1,10 +1,10 @@
-name: static_code_validation_src
+name: Logger Automated Tests
 
 on:
   pull_request:
     paths:
       - 'stlogger/**'
-      - '.github/workflows/linter_check_sources.yml'
+      - '.github/workflows/logger_actions.yml'
     types: [opened,synchronize]
 
 jobs:
