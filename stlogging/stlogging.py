@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""" STLogger module is used to write formatted messages to standard output.
+""" STLogging module is used to write formatted messages to standard output.
 """
 
 # ---------------------------------------------------------------------
@@ -43,9 +43,21 @@ __maintainer__ = 'Nikola Radakovic'
 __email__      = 'radaknikolans@gmail.com'
 __status__     = 'Development'
 
+# ---------------------------------------------------------------------
+# Private configuration variables
+# ---------------------------------------------------------------------
+_MODULES = []
+_DEFAULT_NAME = 'stlogging'
+_FORMAT = (
+    '%(asctime)s - '
+    '%(name)s - '
+    '%(levelname)s: '
+    '%(message)s'
+)
+_CONFIG = None
 
 # ---------------------------------------------------------------------
-# Global level variables wrapped from logging module
+# Public level variables wrapped from logging module
 # ---------------------------------------------------------------------
 NOTSET = log.NOTSET
 DEBUG = log.DEBUG
@@ -56,85 +68,63 @@ CRITICAL = log.CRITICAL
 
 
 # ---------------------------------------------------------------------
-# Logger class
+# Public logging functions
 # ---------------------------------------------------------------------
-class STLogger(log.Logger):
+def set_loggers(config):
     """
-    Implementation of logger class which is used to print logs from
-    different modules, files, and functions with colored output or
-    without it (several formats supported).
+    Function to set loggers from JSON configuration file
+    :param config: string path to the json configuration.
     """
-    _MODULES = []
-    _DEFAULT_NAME = 'STLogger'
-    _FORMAT = (
-        '%(asctime)s - '
-        '%(name)s - '
-        '%(levelname)s: '
-        '%(message)s'
-    )
-    _CONFIG = None
+    with open(config) as handle:
+        for raw in json.load(handle)['modules']:
+            create_logger(raw['module'],
+                          log.getLevelName(raw['level']))
 
-    def __init__(self, default_name=_DEFAULT_NAME, config=None):
-        """
-        Constructor of the logger which will set default name for
-        all modules.
-        :param default_name: string name that will be used for all
-                             logs which don't set name explicitly.
-        :param config: string path to the json configuration.
-        """
-        super().__init__(name=default_name)
-        if config is not None:
-            with open(config) as handle:
-                for raw in json.load(handle)['modules']:
-                    STLogger.create_logger(raw['module'],
-                                           log.getLevelName(raw['level']))
 
-    @staticmethod
-    def create_logger(module=None, level=INFO, c_format=None):
-        """
-        Static class which creates custom logger.
-        :param module: string name of the module
-        :param level: int level of supported messages (it will override
-                      current level saved on module)
-        :param c_format: tuple object representing format for messages
-        :return: Logger objects which can be used to print messages
-        """
-        name = STLogger._DEFAULT_NAME
-        if module is not None:
-            if module not in STLogger._MODULES:
-                STLogger._MODULES.append({'module': module,
-                                          'level': level})
-            name = module
+def create_logger(module=None, level=INFO, c_format=None):
+    """
+    Function for creating logger assigned to specific module
+    :param module: string name of the module
+    :param level: int level of supported messages (it will override
+                  current level saved on module)
+    :param c_format: tuple object representing format for messages
+    :return: Logger objects which can be used to print messages
+    """
+    name = _DEFAULT_NAME
+    if module is not None:
+        if module not in _MODULES:
+            _MODULES.append({'module': module, 'level': level})
+        name = module
 
-        logger = log.getLogger(name)
-        if not logger.handlers:
-            stream = log.StreamHandler()
-            formatter = log.Formatter(c_format if c_format is not None
-                                      else STLogger._FORMAT)
-            stream.setFormatter(formatter)
-            logger.addHandler(stream)
-            logger.setLevel(level)
+    logger = log.getLogger(name)
+    if not logger.handlers:
+        stream = log.StreamHandler()
+        formatter = log.Formatter(c_format if c_format is not None
+                                  else _FORMAT)
+        stream.setFormatter(formatter)
+        logger.addHandler(stream)
+        logger.setLevel(level)
 
-        if logger.level != level:
-            logger.setLevel(level)
+    if logger.level != level:
+        logger.setLevel(level)
 
-        return logger
+    return logger
 
-    @staticmethod
-    def get_logger(module):
-        """
-        Wrapper method around logging.getLogger() to make sure the formatting
-        for requested logger has been set using json config file.
-        :param module: string name of the module
-        :return: Logger objects which can be used to print messages
-        """
-        if len(STLogger._MODULES) == 0:
-            raise ValueError('There are no modules set!')
 
-        if not any(m['module'] == module for m in STLogger._MODULES):
-            raise ValueError(f'Module {module} is not set')
+def get_logger(module):
+    """
+    Wrapper function around logging.getLogger() to make sure the formatting
+    for requested logger has been set using json config file.
+    :param module: string name of the module
+    :return: Logger objects which can be used to print messages
+    """
+    if len(_MODULES) == 0:
+        raise ValueError('There are no modules set!')
 
-        return log.getLogger(module)
+    if not any(m['module'] == module for m in _MODULES):
+        raise ValueError(f'Module {module} is not set')
+
+    return log.getLogger(module)
 
 # ---------------------------------------------------------------------
 # Version and authorship info functions
