@@ -24,10 +24,12 @@
 """ STLogger module is used to write formatted messages to standard output.
 """
 
-from stlogger.stlogger import STLogger, \
+from stlogging.stlogging import set_loggers, create_logger, get_logger, \
     NOTSET, DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-__all__ = ["STLogger",
+__all__ = ["set_loggers",
+           "create_logger",
+           "get_logger",
            "NOTSET",
            "DEBUG",
            "INFO",
