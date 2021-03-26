@@ -1,4 +1,5 @@
 # BluePhoenix Logging (BPL)
+![](https://github.com/nradakovic/stlogging/workflows/Linter%20check%20-%20sources/badge.svg)
 ![](https://github.com/nradakovic/stlogging/workflows/Linter%20check%20-%20examples/badge.svg)
 
 ## Introduction
