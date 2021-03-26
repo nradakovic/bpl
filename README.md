@@ -1,4 +1,4 @@
-# STLogger
+# STLogging
 ![](https://github.com/nradakovic/stlogging/workflows/Linter%20check%20-%20examples/badge.svg)
 
 ## Introduction
