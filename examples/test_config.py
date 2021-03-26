@@ -21,9 +21,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""" Example script how the stlogging can be used by setting config.
+""" Example script how the bplogging can be used by setting config.
 """
-from stlogging.stlogging import set_loggers, get_logger
+from bpl.bpl import set_loggers, get_logger
 
 
 def print_logs(module):
