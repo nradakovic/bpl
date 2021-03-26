@@ -12,7 +12,7 @@ Features which STLogging has and extends native logging are:
 
 
 ## Usage
-By importing the module `stlogger` the main logger class can be used as shown
+By importing the module `stlogging` and call create_logger to init Logger class from native logging
  below:
 ```python
 from stlogging import create_logger, DEBUG
@@ -22,7 +22,7 @@ log.debug("Test")
 ```
 
 ## License
-STLogger has MIT License.
+STLogging has MIT License.
 For more details please visit: https://opensource.org/licenses/MIT
 
 ## Development
