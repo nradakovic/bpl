@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""" STLogging module is used to write formatted messages to standard output.
+""" BPL module is used to write formatted messages to standard output.
 """
 
 # ---------------------------------------------------------------------
@@ -47,7 +47,7 @@ __status__     = 'Development'
 # Private configuration variables
 # ---------------------------------------------------------------------
 _MODULES = []
-_DEFAULT_NAME = 'stlogging'
+_DEFAULT_NAME = 'bpl'
 _FORMAT = (
     '%(asctime)s - '
     '%(name)s - '

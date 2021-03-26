@@ -1,15 +1,15 @@
-name: Automated Tests on Source
+name: Linter check - sources
 
 on:
   pull_request:
     paths:
-      - 'stlogging/**'
-      - '.github/workflows/stlogging_linter.yml'
+      - 'bpl/**'
+      - '.github/workflows/bpl_linter.yml'
     types: [opened,synchronize]
 
 jobs:
   static_check:
-    name: Run static code checker on sources
+    name: Run Python linter on sources
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -21,6 +21,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint
-      - name: Run pylint on stlogging
+      - name: Run pylint on sources
         run: |
-          pylint stlogging
+          pylint bpl

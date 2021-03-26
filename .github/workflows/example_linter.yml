@@ -9,7 +9,7 @@ on:
 
 jobs:
   static_check:
-    name: Run static code checker on examples
+    name: Run Python linter on examples
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
