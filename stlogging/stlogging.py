@@ -40,6 +40,7 @@ __copyright__  = 'Copyright 2021, The Logger Project'
 __license__    = 'MIT'
 __version__    = '0.0.1'
 __maintainer__ = 'Nikola Radakovic'
+__email__      = 'radaknikolans@yahoo.com'
 __status__     = 'Development'
 
 # ---------------------------------------------------------------------
