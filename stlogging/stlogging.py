@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # --------------------------------------------------------------
 # Copyright (C) 2021 Nikola Radakovic
-# email: radaknikolans@gmail.com
+# email: radaknikolans@yahoo.com
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
