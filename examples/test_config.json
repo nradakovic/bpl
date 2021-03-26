@@ -1,0 +1,7 @@
+{
+  "modules": [
+    {"module": "Init", "level": "INFO"},
+    {"module": "Module_1", "level": "DEBUG"},
+    {"module": "Test", "level": "WARNING"}
+  ]
+}

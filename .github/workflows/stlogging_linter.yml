@@ -1,10 +1,10 @@
-name: Logger Automated Tests
+name: Automated Tests on Source
 
 on:
   pull_request:
     paths:
-      - 'stlogger/**'
-      - '.github/workflows/logger_actions.yml'
+      - 'stlogging/**'
+      - '.github/workflows/stlogging_linter.yml'
     types: [opened,synchronize]
 
 jobs:

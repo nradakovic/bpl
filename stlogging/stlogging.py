@@ -81,28 +81,32 @@ def set_loggers(config):
                           log.getLevelName(raw['level']))
 
 
-def create_logger(module=None, level=INFO, c_format=None):
+def create_logger(module=None, level=INFO, c_format=None, stream=None):
     """
-    Function for creating logger assigned to specific module
+    Function for setting logger assigned to specific module with custom format
+    and stream.
     :param module: string name of the module
     :param level: int level of supported messages (it will override
                   current level saved on module)
-    :param c_format: tuple object representing format for messages
+    :param c_format: tuple object representing format for messages, default
+                     stdout
+    :param stream: stream object for redirecting print output, default None
     :return: Logger objects which can be used to print messages
     """
     name = _DEFAULT_NAME
     if module is not None:
-        if module not in _MODULES:
-            _MODULES.append({'module': module, 'level': level})
         name = module
+
+    if not any(m['module'] == module for m in _MODULES):
+        _MODULES.append({'module': module, 'level': level})
 
     logger = log.getLogger(name)
     if not logger.handlers:
-        stream = log.StreamHandler()
+        stream_handler = log.StreamHandler(stream)
         formatter = log.Formatter(c_format if c_format is not None
                                   else _FORMAT)
-        stream.setFormatter(formatter)
-        logger.addHandler(stream)
+        stream_handler.setFormatter(formatter)
+        logger.addHandler(stream_handler)
         logger.setLevel(level)
 
     if logger.level != level:
@@ -125,6 +129,20 @@ def get_logger(module):
         raise ValueError(f'Module {module} is not set')
 
     return log.getLogger(module)
+
+def remove_stream_handler(module, stream):
+    """
+    Method for removing stream handler from logger
+    :return: ---
+    """
+    if len(_MODULES) == 0:
+        raise ValueError('There are no modules set!')
+
+    if not any(m['module'] == module for m in _MODULES):
+        raise ValueError(f'Module {module} is not set')
+
+    logger = log.getLogger(module)
+    logger.removeHandler(log.StreamHandler(stream))
 
 # ---------------------------------------------------------------------
 # Version and authorship info functions
