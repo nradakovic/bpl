@@ -40,7 +40,6 @@ __copyright__  = 'Copyright 2021, The Logger Project'
 __license__    = 'MIT'
 __version__    = '0.0.1'
 __maintainer__ = 'Nikola Radakovic'
-__email__      = 'radaknikolans@gmail.com'
 __status__     = 'Development'
 
 # ---------------------------------------------------------------------
@@ -157,7 +156,6 @@ def authorship():
     print(f'License:    {__license__}')
     print(f'Version:    {__version__}')
     print(f'Maintainer: {__maintainer__}')
-    print(f'E-Mail:     {__email__}')
     print(f'Status:     {__status__}')
 
 
